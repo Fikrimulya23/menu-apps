@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:menu_apps/add_menu.dart';
@@ -41,144 +42,210 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future _deleteMenu(String id) async {
+    var response = await http.delete(
+      Uri.parse("$baseURL/api/delete/" + id),
+    );
+
+    if (response.statusCode == 200) {
+      // if (mounted) {
+
+      return jsonDecode(response.body);
+      // }
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text("Aplikasi Menu Makanan"),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) {
-                return AddMenu();
-              },
-            ));
-          },
-          child: Icon(Icons.add),
-        ),
-        body: Container(
-          margin: EdgeInsets.fromLTRB(7, 10, 7, 10),
-          child: FutureBuilder(
-              // child: StreamBuilder(
-              future: getMenu(),
-              // stream: getProduct2(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return ListView.builder(
-                      itemCount: (snapshot.data as dynamic)['data'].length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          elevation: 3,
-                          child: Container(
-                            width: MediaQuery.of(context).size.width,
-                            height: 100,
-                            margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                            /* decoration: BoxDecoration(
-                              border: Border.all(),
-                            ), */
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 90,
-                                  height: 90,
-                                  child: Image.network(
-                                    "$baseURL" +
-                                        ((snapshot.data as dynamic)['data']
-                                            [index]['image']),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          (snapshot.data as dynamic)['data']
-                                                  [index]['name'] +
-                                              "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
+        body: Stack(
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Container(
+                margin: EdgeInsets.fromLTRB(7, 10, 7, 10),
+                child: FutureBuilder(
+                    // child: StreamBuilder(
+                    future: getMenu(),
+                    // stream: Stream.fromFuture(getMenu()),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return ListView.builder(
+                            itemCount:
+                                (snapshot.data as dynamic)['data'].length,
+                            itemBuilder: (context, index) {
+                              return Card(
+                                elevation: 3,
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 100,
+                                  margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                  /* decoration: BoxDecoration(
+                                    border: Border.all(),
+                                  ), */
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 90,
+                                        height: 90,
+                                        child: Image.network(
+                                          "$baseURL" +
+                                              ((snapshot.data
+                                                      as dynamic)['data'][index]
+                                                  ['image']),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                (snapshot.data
+                                                        as dynamic)['data']
+                                                    [index]['name'],
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              Text(
+                                                "Rp. " +
+                                                    (snapshot.data
+                                                            as dynamic)['data']
+                                                        [index]['price'],
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        Text(
-                                          "Rp. " +
-                                              (snapshot.data as dynamic)['data']
-                                                  [index]['price'],
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  child: Center(
-                                    child: IconButton(
-                                        onPressed: () {},
-                                        icon: Icon(Icons.more_vert)),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        );
-                      });
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                }
-                return Container(
-                  child: Center(
-                    child: Text("Belum ada menu"),
-                  ),
-                );
-              }),
-        ),
-        /* body: Center(
-          child: Column(
-            children: [
-              FutureBuilder(
-                  future: http.read(Uri.parse('$baseURL/api/profile'),
-                      headers: {"Authorization": widget.jwt}),
-                  builder: (context, snapshot) => snapshot.hasData
-                      ? Column(
-                          children: <Widget>[
-                            Text(
-                                "${widget.payload['data']['name']}, here's the data:"),
-                            Text(snapshot.data.toString(),
-                                style: TextStyle(fontSize: 12))
-                          ],
-                        )
-                      : snapshot.hasError
-                          ? Text("An error occurred")
-                          : CircularProgressIndicator()),
-              ElevatedButton(
-                  onPressed: () {
-                    storage.delete(key: "jwt");
+                                      ),
+                                      Container(
+                                        child: Center(
+                                          child: IconButton(
+                                              onPressed: () {
+                                                showBottomSheet(
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return Container(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .width,
+                                                      height: 100,
+                                                      decoration: BoxDecoration(
+                                                        // color: Colors.grey,
+                                                        border: Border.all(
+                                                          width: 2,
+                                                          color: Colors
+                                                              .grey.shade300,
+                                                        ),
+                                                      ),
+                                                      child: Column(
+                                                        children: [
+                                                          TextButton(
+                                                            onPressed: () {},
+                                                            child: Text(
+                                                              "Edit",
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              _deleteMenu(
+                                                                (snapshot.data as dynamic)[
+                                                                            'data']
+                                                                        [
+                                                                        index]['id']
+                                                                    .toString(),
+                                                              );
 
-                    Navigator.pushReplacement(context, MaterialPageRoute(
-                      builder: (context) {
-                        return LoginPage();
-                      },
-                    ));
-                  },
-                  child: Text("Logout"))
-            ],
-          ),
-        ), */
+                                                              Future.delayed(
+                                                                  Duration(
+                                                                      seconds:
+                                                                          1),
+                                                                  () {
+                                                                Navigator.pushAndRemoveUntil(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                  builder:
+                                                                      (context) {
+                                                                    return MyApp();
+                                                                  },
+                                                                ),
+                                                                    (route) =>
+                                                                        false);
+                                                              });
+                                                            },
+                                                            child: Text(
+                                                              "Hapus",
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .black),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              icon: Icon(Icons.more_vert)),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              );
+                            });
+                      } else if (snapshot.hasError) {
+                        return Text("${snapshot.error}");
+                      }
+                      return Container(
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }),
+              ),
+            ),
+            Positioned(
+              bottom: 30,
+              right: 20,
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) {
+                      return AddMenu();
+                    },
+                  ));
+                },
+                child: Icon(Icons.add),
+              ),
+            ),
+          ],
+        ),
       );
 }

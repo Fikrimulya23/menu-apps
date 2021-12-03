@@ -9,21 +9,25 @@ import 'package:menu_apps/home_page.dart';
 import 'package:menu_apps/main.dart';
 import 'package:path/path.dart' as Path;
 
-class AddMenu extends StatefulWidget {
-  const AddMenu({Key? key}) : super(key: key);
+class EditPage extends StatefulWidget {
+  final Map menu;
+  const EditPage({
+    required this.menu,
+    Key? key,
+  }) : super(key: key);
 
   @override
-  _AddMenuState createState() => _AddMenuState();
+  _EditPageState createState() => _EditPageState();
 }
 
-class _AddMenuState extends State<AddMenu> {
+class _EditPageState extends State<EditPage> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
 
   File imageFile = File("");
   final picker = ImagePicker();
-  final String url = "$baseURL/api/upload";
+  // final String url = "$baseURL/api/upload";
 
   Future getImageFromGallery() async {
     /* var pickedFile = await picker.pickImage(
@@ -54,9 +58,28 @@ class _AddMenuState extends State<AddMenu> {
     });
   } */
 
-  upload() async {
-    var uri = Uri.parse(url);
-    var request = new http.MultipartRequest('POST', uri);
+  /* Future _editProduct() async {
+    final _response = await http.put(
+        Uri.parse(
+          "$baseURL/api/productsResearcher/" + widget.id.toString(),
+        ),
+        body: {
+          /* "image_1": _image_1Controller.text,
+          "image_2": _image_2Controller.text,
+          "image_3": _image_3Controller.text, */
+          "product_name": _productnameController.text,
+          "description": _descriptionController.text,
+          "stock": _stockController.text,
+          "price": _priceController.text,
+          "weight": _weightController.text,
+          "category_id": category_id.toString(),
+        });
+    return jsonDecode(_response.body);
+  } */
+
+  update(String id) async {
+    var uri = Uri.parse("$baseURL/api/update/$id");
+    var request = new http.MultipartRequest('PUT', uri);
 
     request.fields["name"] = _nameController.text;
     request.fields["description"] = _descriptionController.text;
@@ -99,10 +122,19 @@ class _AddMenuState extends State<AddMenu> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _nameController.text = widget.menu['name'];
+    _descriptionController.text = widget.menu['description'];
+    _priceController.text = widget.menu['price'];
+    imageFile = widget.menu['image'];
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Tambah menu"),
+        title: Text("Edit menu"),
       ),
       body: Container(
         child: SingleChildScrollView(
@@ -183,7 +215,7 @@ class _AddMenuState extends State<AddMenu> {
               SizedBox(height: 30),
               GestureDetector(
                 onTap: () {
-                  upload();
+                  update(widget.menu['id']);
                 },
                 child: Container(
                   width: 300,
