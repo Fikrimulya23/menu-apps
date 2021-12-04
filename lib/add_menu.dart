@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:menu_apps/const.dart';
-import 'package:menu_apps/home_page.dart';
 import 'package:menu_apps/main.dart';
 import 'package:path/path.dart' as Path;
 
@@ -135,6 +134,7 @@ class _AddMenuState extends State<AddMenu> {
                 child: TextFormField(
                   controller: _descriptionController,
                   // controller: _emailController,
+                  maxLines: 8,
                   decoration: InputDecoration(
                     hintText: "deskripsi",
                     border: InputBorder.none,

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:menu_apps/const.dart';
-import 'package:menu_apps/home_page.dart';
 import 'package:menu_apps/main.dart';
 import 'package:path/path.dart' as Path;
 
@@ -24,6 +23,7 @@ class _EditPageState extends State<EditPage> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
+  String urlImage = "";
 
   File imageFile = File("");
   final picker = ImagePicker();
@@ -79,30 +79,33 @@ class _EditPageState extends State<EditPage> {
 
   update(String id) async {
     var uri = Uri.parse("$baseURL/api/update/$id");
-    var request = new http.MultipartRequest('PUT', uri);
+    var request = new http.MultipartRequest('POST', uri);
 
     request.fields["name"] = _nameController.text;
     request.fields["description"] = _descriptionController.text;
     request.fields["price"] = _priceController.text;
 
-    var length_1 = await imageFile.length();
-    var multipartFile_1 = new http.MultipartFile(
-        'image', http.ByteStream(imageFile.openRead()).cast(), length_1,
-        filename: Path.basename(imageFile.path));
-    request.files.add(multipartFile_1);
+    if (imageFile.path.length > 0) {
+      var length_1 = await imageFile.length();
+      var multipartFile_1 = new http.MultipartFile(
+          'image', http.ByteStream(imageFile.openRead()).cast(), length_1,
+          filename: Path.basename(imageFile.path));
+      request.files.add(multipartFile_1);
+    }
 
     var response = await request.send();
     if (response.statusCode > 2) {
-      print("XXXXXXXXXXXX");
       print("Berhasil");
-      print("XXXXXXXXXXXXxx");
+      var res = await http.Response.fromStream(response);
+      // ignore: unused_local_variable
+      // var data = jsonDecode(res.body);
+      if (res.body.isNotEmpty) {
+        print(res.body);
+        json.decode(res.body);
+      }
+      print(response.statusCode);
       if (mounted) {
-        /* _nameController.text = "";
-        _descriptionController.text = "";
-        _priceController.text = "";
-        imageFile.delete(); */
         Future.delayed(Duration(seconds: 2), () {
-          Navigator.pop(context);
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
             builder: (context) {
               return MyApp();
@@ -111,14 +114,8 @@ class _EditPageState extends State<EditPage> {
         });
       }
     } else {
-      print("XXXXXXXXXXXX");
       print("Gagal");
-      print("XXXXXXXXXXXXxx");
     }
-    var res = await http.Response.fromStream(response);
-    // ignore: unused_local_variable
-    var data = jsonDecode(res.body);
-    print(response.statusCode);
   }
 
   @override
@@ -127,7 +124,7 @@ class _EditPageState extends State<EditPage> {
     _nameController.text = widget.menu['name'];
     _descriptionController.text = widget.menu['description'];
     _priceController.text = widget.menu['price'];
-    imageFile = widget.menu['image'];
+    urlImage = widget.menu['image'];
   }
 
   @override
@@ -167,6 +164,7 @@ class _EditPageState extends State<EditPage> {
                 child: TextFormField(
                   controller: _descriptionController,
                   // controller: _emailController,
+                  maxLines: 8,
                   decoration: InputDecoration(
                     hintText: "deskripsi",
                     border: InputBorder.none,
@@ -209,7 +207,7 @@ class _EditPageState extends State<EditPage> {
                     ),
                     // child: Icon(Icons.add),
                     child: (imageFile.path == "")
-                        ? Icon(Icons.add)
+                        ? Image.network(baseURL + widget.menu['image'])
                         : Image.file(imageFile)),
               ),
               SizedBox(height: 30),
