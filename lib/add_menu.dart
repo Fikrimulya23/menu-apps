@@ -25,9 +25,6 @@ class _AddMenuState extends State<AddMenu> {
   final String url = "$baseURL/api/upload";
 
   Future getImageFromGallery() async {
-    /* var pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-    ); */
     var pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     setState(() {
@@ -38,20 +35,6 @@ class _AddMenuState extends State<AddMenu> {
       }
     });
   }
-
-  /* Future getImageFromCamera() async {
-    var pickedFile = await picker.pickImage(
-      source: ImageSource.camera,
-    );
-
-    setState(() {
-      if (pickedFile != null) {
-        imageFile = File(pickedFile.path);
-      } else {
-        print('No image selected.');
-      }
-    });
-  } */
 
   upload() async {
     var uri = Uri.parse(url);
@@ -68,15 +51,12 @@ class _AddMenuState extends State<AddMenu> {
     request.files.add(multipartFile_1);
 
     var response = await request.send();
-    if (response.statusCode > 2) {
-      print("XXXXXXXXXXXX");
-      print("Berhasil");
-      print("XXXXXXXXXXXXxx");
-      if (mounted) {
-        /* _nameController.text = "";
-        _descriptionController.text = "";
-        _priceController.text = "";
-        imageFile.delete(); */
+    if (mounted) {
+      if (response.statusCode > 2) {
+        print("XXXXXXXXXXXX");
+        print("Berhasil");
+        print("XXXXXXXXXXXXxx");
+
         Future.delayed(Duration(seconds: 2), () {
           Navigator.pop(context);
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
